@@ -1,7 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { authAPI } from '../services/api';
-import { AuthContext } from '../context/AuthContext';
+import { authAPI } from '../../services/api';
+import { AuthContext } from '../../context/AuthContext';
 
 const RegisterAdmin = () => {
   const [formData, setFormData] = useState({
@@ -15,7 +15,16 @@ const RegisterAdmin = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { login } = useContext(AuthContext);
+  const { login, user } = useContext(AuthContext);
+
+  // Redirect if already logged in
+  React.useEffect(() => {
+    if (user && user.role === 'admin') {
+      navigate('/admin');
+    } else if (user) {
+      navigate('/voter/dashboard');
+    }
+  }, [user, navigate]);
 
   const handleChange = (e) => {
     if (e.target.name === 'idDocument') {
@@ -53,14 +62,14 @@ const RegisterAdmin = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-gradient-to-br from-purple-50 via-pink-50 to-red-50">
-      <div className="max-w-md w-full space-y-8 animate-slide-up">
+      <div className="max-w-md w-full space-y-8">
         <div className="text-center">
-          <div className="text-6xl mb-4 animate-bounce-slow">👑</div>
+          <div className="text-6xl mb-4">👑</div>
           <h2 className="text-4xl font-extrabold text-gray-900 mb-2">Admin Registration</h2>
           <p className="text-gray-600">Register as an administrator</p>
         </div>
 
-        <div className="card border-2 border-purple-200">
+        <div className="bg-white rounded-2xl shadow-xl p-8 border-2 border-purple-200">
           <div className="mb-4 bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded-lg">
             <div className="flex items-start">
               <span className="text-yellow-500 text-xl mr-2">⚠️</span>
@@ -72,9 +81,9 @@ const RegisterAdmin = () => {
           </div>
 
           {error && (
-            <div className="mb-4 bg-red-50 border-l-4 border-red-500 p-4 rounded-lg animate-fade-in">
+            <div className="mb-4 bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
               <div className="flex items-center">
-                <span className="text-red-500 text-xl mr-2">❌</span>
+                <span className="text-red-500 text-xl mr-2">✕</span>
                 <p className="text-red-700 font-medium">{error}</p>
               </div>
             </div>
@@ -90,7 +99,7 @@ const RegisterAdmin = () => {
                 value={formData.name}
                 onChange={handleChange}
                 required
-                className="input-field"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
               />
             </div>
 
@@ -103,7 +112,7 @@ const RegisterAdmin = () => {
                 value={formData.email}
                 onChange={handleChange}
                 required
-                className="input-field"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
               />
             </div>
 
@@ -116,7 +125,7 @@ const RegisterAdmin = () => {
                 value={formData.password}
                 onChange={handleChange}
                 required
-                className="input-field"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
               />
             </div>
 
@@ -128,7 +137,7 @@ const RegisterAdmin = () => {
                 value={formData.dob}
                 onChange={handleChange}
                 required
-                className="input-field"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
               />
             </div>
 
@@ -143,7 +152,7 @@ const RegisterAdmin = () => {
                 value={formData.adminSecret}
                 onChange={handleChange}
                 required
-                className="input-field border-purple-300 focus:ring-purple-500"
+                className="w-full px-4 py-3 border border-purple-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
               />
               <p className="text-xs text-gray-500 mt-1">
                 Contact system administrator for this key
@@ -166,7 +175,7 @@ const RegisterAdmin = () => {
             <button
               type="submit"
               disabled={loading}
-              className={`w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold py-3 px-6 rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:shadow-xl transition-all ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               {loading ? (
                 <span className="flex items-center justify-center">

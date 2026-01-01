@@ -1,7 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { authAPI } from '../services/api';
-import { AuthContext } from '../context/AuthContext';
+import { authAPI } from '../../services/api';
+import { AuthContext } from '../../context/AuthContext';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -14,7 +14,18 @@ const Register = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { login } = useContext(AuthContext);
+  const { login, user } = useContext(AuthContext);
+
+  // Redirect if already logged in
+  React.useEffect(() => {
+    if (user) {
+      if (user.role === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/voter/dashboard');
+      }
+    }
+  }, [user, navigate]);
 
   const handleChange = (e) => {
     if (e.target.name === 'idDocument') {
@@ -41,7 +52,13 @@ const Register = () => {
     try {
       const response = await authAPI.register(data);
       login(response.data, response.data.token);
-      navigate('/dashboard');
+      
+      // Role-based navigation
+      if (response.data.role === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/voter/dashboard');
+      }
     } catch (err) {
       setError(err.response?.data?.message || 'Registration failed');
     } finally {
@@ -51,16 +68,16 @@ const Register = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
-      <div className="max-w-md w-full space-y-8 animate-slide-up">
+      <div className="max-w-md w-full space-y-8">
         <div className="text-center">
-          <div className="text-6xl mb-4 animate-bounce-slow">🗳️</div>
+          <div className="text-6xl mb-4">🗳️</div>
           <h2 className="text-4xl font-extrabold text-gray-900 mb-2">Create Account</h2>
           <p className="text-gray-600">Join the blockchain voting revolution</p>
         </div>
 
-        <div className="card">
+        <div className="bg-white rounded-2xl shadow-xl p-8">
           {error && (
-            <div className="mb-4 bg-red-50 border-l-4 border-red-500 p-4 rounded-lg animate-fade-in">
+            <div className="mb-4 bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
               <div className="flex items-center">
                 <span className="text-red-500 text-xl mr-2">⚠️</span>
                 <p className="text-red-700 font-medium">{error}</p>
@@ -78,7 +95,7 @@ const Register = () => {
                 value={formData.name}
                 onChange={handleChange}
                 required
-                className="input-field"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
               />
             </div>
 
@@ -91,7 +108,7 @@ const Register = () => {
                 value={formData.email}
                 onChange={handleChange}
                 required
-                className="input-field"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
               />
             </div>
 
@@ -104,7 +121,7 @@ const Register = () => {
                 value={formData.password}
                 onChange={handleChange}
                 required
-                className="input-field"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
               />
             </div>
 
@@ -116,7 +133,7 @@ const Register = () => {
                 value={formData.dob}
                 onChange={handleChange}
                 required
-                className="input-field"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
               />
             </div>
 
@@ -131,12 +148,13 @@ const Register = () => {
                   className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer"
                 />
               </div>
+              <p className="text-xs text-gray-500 mt-2">Upload a government-issued ID for faster verification</p>
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className={`w-full btn-primary ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:shadow-xl transition-all ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               {loading ? (
                 <span className="flex items-center justify-center">
@@ -160,6 +178,10 @@ const Register = () => {
               </Link>
             </p>
           </div>
+        </div>
+
+        <div className="text-center text-sm text-gray-500">
+          <p>🔒 Your data is secured with blockchain technology</p>
         </div>
       </div>
     </div>

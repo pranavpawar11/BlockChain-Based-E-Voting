@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { voteAPI, electionAPI } from '../services/api';
+import { voteAPI, electionAPI } from '../../services/api';
+import LoadingSpinner from '../../components/common/LoadingSpinner';
 
 const Results = () => {
   const { electionId } = useParams();
@@ -34,28 +35,24 @@ const Results = () => {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600"></div>
-          <p className="mt-4 text-xl text-gray-700 font-semibold">Loading results...</p>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner fullScreen message="Loading results..." />;
   }
 
   if (results === 'hidden') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-2xl mx-auto">
-          <div className="card text-center py-12 animate-fade-in">
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-12 text-center">
             <div className="text-6xl mb-4">🔒</div>
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Results Not Published</h2>
             <p className="text-lg text-gray-600 mb-6">
               The election results have not been published yet by the administrator.
             </p>
             <p className="text-gray-500">Please check back later.</p>
-            <button onClick={() => navigate('/elections')} className="mt-6 btn-primary">
+            <button 
+              onClick={() => navigate('/voter/elections')} 
+              className="mt-6 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-3 rounded-lg font-semibold transition-all shadow-md hover:shadow-lg"
+            >
               Back to Elections
             </button>
           </div>
@@ -67,19 +64,19 @@ const Results = () => {
   const totalVotes = Array.isArray(results) ? results.reduce((sum, r) => sum + r.votes, 0) : 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-5xl mx-auto">
-        <div className="mb-8 animate-slide-up">
+        <div className="mb-8">
           <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-2">
             {election?.title} - Results 📊
           </h1>
           <p className="text-lg text-gray-600">Live results from the blockchain</p>
         </div>
 
-        <div className="card mb-8 animate-fade-in">
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8 mb-8">
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div>
-              <h3 className="text-3xl font-bold text-gray-900">{totalVotes}</h3>
+              <h3 className="text-4xl font-bold text-gray-900">{totalVotes}</h3>
               <p className="text-gray-600">Total Votes Cast</p>
             </div>
             <div className="flex items-center space-x-2 text-green-600">
@@ -97,10 +94,9 @@ const Results = () => {
             return (
               <div
                 key={result.candidateId}
-                className={`card animate-fade-in ${
-                  isWinner ? 'ring-4 ring-yellow-400 bg-gradient-to-r from-yellow-50 to-orange-50' : ''
+                className={`bg-white rounded-2xl shadow-lg border-2 p-6 transition-all ${
+                  isWinner ? 'border-yellow-400 ring-4 ring-yellow-200 bg-gradient-to-r from-yellow-50 to-orange-50' : 'border-gray-200'
                 }`}
-                style={{animationDelay: `${index * 0.1}s`}}
               >
                 <div className="flex items-center justify-between mb-4 flex-wrap gap-4">
                   <div className="flex items-center space-x-4">
@@ -143,8 +139,8 @@ const Results = () => {
         </div>
 
         {Array.isArray(results) && results.length > 0 && results[0].votes > 0 && (
-          <div className="card mt-8 bg-gradient-to-r from-yellow-400 to-orange-500 text-white animate-fade-in" style={{animationDelay: '0.5s'}}>
-            <div className="text-center py-6">
+          <div className="bg-gradient-to-r from-yellow-400 to-orange-500 rounded-2xl shadow-xl p-8 mt-8 text-white">
+            <div className="text-center">
               <div className="text-5xl mb-4 animate-bounce">🏆</div>
               <h2 className="text-3xl font-extrabold mb-2">Winner Declared!</h2>
               <p className="text-xl mb-1">{results[0].name}</p>
@@ -160,7 +156,7 @@ const Results = () => {
         )}
 
         {Array.isArray(results) && results.length === 0 && (
-          <div className="card text-center py-12">
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-12 text-center">
             <div className="text-6xl mb-4">📊</div>
             <h3 className="text-2xl font-bold text-gray-900 mb-2">No Votes Yet</h3>
             <p className="text-gray-600">Be the first to cast your vote!</p>
@@ -168,7 +164,10 @@ const Results = () => {
         )}
 
         <div className="mt-8 text-center">
-          <button onClick={() => navigate('/elections')} className="btn-primary">
+          <button 
+            onClick={() => navigate('/voter/elections')} 
+            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-3 rounded-lg font-semibold transition-all shadow-md hover:shadow-lg"
+          >
             Back to Elections
           </button>
         </div>

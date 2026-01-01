@@ -2,7 +2,6 @@ const Election = require('../models/Election');
 const Candidate = require('../models/Candidate');
 const VoteRecord = require('../models/VoteRecord');
 const User = require('../models/User');
-
 exports.createElection = async (req, res) => {
   try {
     const { title, description, startDate, endDate } = req.body;
@@ -169,17 +168,21 @@ exports.getElectionVoters = async (req, res) => {
   }
 };
 
+const generateCandidateId = () => {
+  return Math.floor(100000 + Math.random() * 900000); // 6-digit number
+};
+
 exports.addCandidate = async (req, res) => {
   try {
-    const { name, party, manifesto, electionId, candidateId } = req.body;
-    
+    const { name, party, manifesto, electionId } = req.body;
+
     const candidate = await Candidate.create({
       name,
       party,
       manifesto,
       photo: req.file ? req.file.filename : '',
       electionId,
-      candidateId
+      candidateId: generateCandidateId()
     });
 
     res.status(201).json(candidate);
@@ -187,6 +190,7 @@ exports.addCandidate = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
 
 exports.updateCandidate = async (req, res) => {
   try {
@@ -234,6 +238,57 @@ exports.getCandidates = async (req, res) => {
     const { electionId } = req.params;
     const candidates = await Candidate.find({ electionId }).sort({ candidateId: 1 });
     res.json(candidates);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Add this NEW function after getElectionVoters
+exports.getAllElectionVoters = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Get all verified users (potential voters)
+    const allUsers = await User.find({ 
+      role: 'voter',
+      isVerified: true 
+    }).select('name email walletAddress isVerified createdAt');
+    
+    // Get vote records for this election
+    const voteRecords = await VoteRecord.find({ electionId: id });
+    
+    // Create a map of users who voted
+    const votedUserIds = new Set(voteRecords.map(record => record.userId.toString()));
+    
+    // Combine data
+    const voters = allUsers.map(user => {
+      const userVote = voteRecords.find(record => record.userId.toString() === user._id.toString());
+      
+      return {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        walletAddress: user.walletAddress,
+        isVerified: user.isVerified,
+        hasVoted: votedUserIds.has(user._id.toString()),
+        verifiedAt: user.createdAt,
+        transactionHash: userVote?.transactionHash || null,
+        blockNumber: userVote?.blockNumber || null,
+        votedAt: userVote?.timestamp || null
+      };
+    });
+    
+    // Calculate stats
+    const totalVoters = voters.length;
+    const votedCount = voters.filter(v => v.hasVoted).length;
+    const notVotedCount = totalVoters - votedCount;
+    
+    res.json({
+      totalVoters,
+      votedCount,
+      notVotedCount,
+      voters
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

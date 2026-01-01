@@ -11,6 +11,7 @@ const {
   toggleElectionStatus,
   toggleResultsPublished,
   getElectionVoters,
+  getAllElectionVoters,
   addCandidate,
   updateCandidate,
   deleteCandidate,
@@ -33,7 +34,8 @@ router.post('/', protect, adminOnly, createElection);
 router.put('/:id', protect, adminOnly, updateElection);
 router.put('/:id/toggle', protect, adminOnly, toggleElectionStatus);
 router.put('/:id/toggle-results', protect, adminOnly, toggleResultsPublished);
-router.get('/:id/voters', protect, adminOnly, getElectionVoters);
+// router.get('/:id/voters', protect, adminOnly, getElectionVoters);
+router.get('/:id/voters', protect, adminOnly, getAllElectionVoters);
 router.delete('/:id', protect, adminOnly, deleteElection);
 router.get('/', protect, getElections);
 router.get('/active', protect, getActiveElections);
